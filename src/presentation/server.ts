@@ -18,13 +18,21 @@ export class Server {
   }
 
   async start() {
-    //*Middlewares
+    //* Middlewares
 
-    //*Public folder
+    //* Public folder
     this.app.use(express.static(this.publicPath));
 
+    //* Routes
+    this.app.get("/api/todos", (req, res) => {
+      res.json({ todos: "Todos" });
+    });
+
+    //* SPA
     this.app.use((req, res) => {
-      const indexPath = path.join(__dirname + `../../../${this.publicPath}/index.html`);
+      const indexPath = path.join(
+        __dirname + `../../../${this.publicPath}/index.html`
+      );
       res.sendFile(indexPath);
     });
 
