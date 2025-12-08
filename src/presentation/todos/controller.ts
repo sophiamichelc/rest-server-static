@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createDate } from "../../helpers/create-date";
 
 const todos = [
   {
@@ -44,13 +45,31 @@ export class TodosController {
   };
 
   getTodoById = (req: Request, res: Response) => {
-    
     const id = +req.params.id!;
+
+    if (isNaN(id))
+      res.status(400).json({ error: "ID arguement is not a number" });
 
     const todo = todos.find((todo) => todo.id === id);
 
     todo
       ? res.json(todo)
       : res.status(404).json({ message: `Todo with Id ${id} is not found` });
+  };
+
+  createTodo = (req: Request, res: Response) => {
+    const { title, description } = req.body;
+
+    const newTodo = {
+      id: todos.length + 1,
+      title,
+      description,
+      completed: false,
+      priority: "Baja",
+      createdAt: createDate(),
+    };
+    todos.push(newTodo);
+
+    res.status(201).json(newTodo);
   };
 }
