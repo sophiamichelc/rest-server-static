@@ -15,6 +15,10 @@ export class TodosRoutes {
 
     router.post("/", todoController.createTodo);
 
+    router.patch("/:id", todoController.updateTodo); 
+
+    router.delete("/:id", todoController.deleteTodo);
+
     return router;
   }
 }
