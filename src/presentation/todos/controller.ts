@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../../data/postgres";
+import { CreateTodoDto } from "../../domain/dtos/todos/create-todo";
+import { UpdateTodoDto } from "../../domain/dtos";
 
 export class TodosController {
   getTodos = async (req: Request, res: Response) => {
@@ -25,17 +27,13 @@ export class TodosController {
   };
 
   createTodo = async (req: Request, res: Response) => {
-    const { title, description } = req.body;
-
-    if (!title) res.status(400).json({ error: "Title is required" });
-    if (!description)
-      res.status(400).json({ error: "Description is required" });
+    const [error, createTodoDto] = CreateTodoDto.create(req.body);
+    if (error) {
+      return res.status(400).json({ mesage: error });
+    }
 
     const todo = await prisma.todo.create({
-      data: {
-        title: title,
-        description: description,
-      },
+      data: createTodoDto!,
     });
 
     res.status(201).json(todo);
@@ -49,30 +47,34 @@ export class TodosController {
     }
 
     const todo = await prisma.todo.findFirst({
-      where:{id}
-    })
+      where: { id },
+    });
 
-    
     if (!todo) {
       return res
-      .status(404)
-      .json({ message: `Todo with id ${id} is not found` });
+        .status(404)
+        .json({ message: `Todo with id ${id} is not found` });
     }
-    
-    const { title, description, completed, priority } = req.body;
 
-   
-    const updateTodo = await  prisma.todo.update({
-      data:{
+    const [error, updateTodoDto] = UpdateTodoDto.create(req.body);
+
+    if (error) {
+      return res.status(400).json({ error });
+    }
+
+    const { title, description, completed, priority } = updateTodoDto as any;
+
+    const updateTodo = await prisma.todo.update({
+      data: {
         title,
         description,
         completed,
-        priority
+        priority,
       },
       where: {
-        id
-      }
-    })
+        id,
+      },
+    });
 
     return res.json(updateTodo);
   };
