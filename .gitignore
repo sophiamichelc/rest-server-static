@@ -4,4 +4,4 @@ keys/
 /postgres
 
 /src/generated/prisma
-/dist
+dist/
