@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateTodoDto } from "../../domain/dtos/todos/create-todo";
 import { UpdateTodoDto } from "../../domain/dtos";
-import { CreateTodo, DeleteTodo, GetTodo, GetTodos, TodoRepository, UpdateTodo } from "../../domain";
+import { TodoRepository } from "../../domain";
 
 export class TodosController {
 
@@ -10,13 +10,25 @@ export class TodosController {
   ) { }
 
   getTodos = async (req: Request, res: Response) => {
-    new GetTodos(this.todoRepository).execute().then(todos => res.json(todos)).catch(error => res.status(400).json({ error }))
+    const todos = await this.todoRepository.getAll()
+    console.log({ todos })
+    res.json(todos)
   };
 
   getTodoById = async (req: Request, res: Response) => {
     const id = +req.params.id!;
 
-    new GetTodo(this.todoRepository).execute(id).then(todo => res.json(todo)).catch(error => res.status(400).json({ error }))
+    try {
+      if (isNaN(id)) {
+        res.status(400).json({ error: "ID arguement is not a number" })
+      }
+
+      const todo = await this.todoRepository.findById(id)
+      res.json(todo)
+
+    } catch (error) {
+      res.status(400).json({ error })
+    }
   };
 
   createTodo = async (req: Request, res: Response) => {
@@ -25,7 +37,9 @@ export class TodosController {
       return res.status(400).json({ mesage: error });
     }
 
-    new CreateTodo(this.todoRepository).execute(createTodoDto!).then(todo => res.json(todo)).catch(error => res.json({ error }))
+    const todo = await this.todoRepository.create(createTodoDto!)
+
+    res.status(201).json(todo);
   };
 
   updateTodo = async (req: Request, res: Response) => {
@@ -41,7 +55,8 @@ export class TodosController {
       return res.status(400).json({ error });
     }
 
-    new UpdateTodo(this.todoRepository, id).execute(updateTodoDto!, id).then(todo => res.json(todo)).catch(error => res.status(400).json({ error }))
+    const todo = await this.todoRepository.UpdateById(updateTodoDto!, id)
+    return res.json(todo);
   };
 
   deleteTodo = async (req: Request, res: Response) => {
@@ -50,7 +65,7 @@ export class TodosController {
     if (isNaN(id)) {
       res.status(400).json({ error: "ID argument is not a number" });
     }
-
-    new DeleteTodo(this.todoRepository).execute(id).then(todo => res.json(todo)).catch(error => res.status(400).json({ error }))
+    const deleteTodo = await this.todoRepository.deleteById(id)
+    res.status(200).json(deleteTodo);
   };
 }

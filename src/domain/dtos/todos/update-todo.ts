@@ -19,17 +19,14 @@ export class UpdateTodoDto {
     public readonly description?: string,
     public readonly completed?: boolean,
     public readonly priority?: string
-  ) {}
+  ) { }
 
   static create(props: { [key: string]: any }): [string?, UpdateTodoDto?] {
     const parsed = UpdateTodoSchema.safeParse(props);
-
     if (!parsed.success) {
-        return [parsed.error.issues.map(err => err.message).join(", ")]
+      return [parsed.error.issues.map(err => err.message).join(", ")]
     }
-
     const { title, description, completed, priority } = parsed.data;
-
-    return ["", new UpdateTodoDto(title,description,completed,priority)];
+    return ["", new UpdateTodoDto(title, description, completed, priority)];
   }
 }
